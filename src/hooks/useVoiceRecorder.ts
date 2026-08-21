@@ -79,6 +79,8 @@ export function useVoiceRecorder({ onTranscribed, onError, maxSeconds = 60 }: Us
           const res = await transcribeAudio({ audio_base64, mime_type: mimeType })
           if (res.error || !res.text) {
             onError(res.error || 'Could not transcribe that recording.')
+          } else if (typeof res.text !== 'string') {
+            onError('Transcription service returned an unexpected response.')
           } else {
             onTranscribed(res.text)
           }
