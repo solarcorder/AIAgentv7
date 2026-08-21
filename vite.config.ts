@@ -5,6 +5,7 @@ import { VitePWA } from 'vite-plugin-pwa'
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: '/AIAgentv7/', // <--- Added: Tells Vite to use the GitHub Pages subpath
   plugins: [
     react(),
     tailwindcss(),
@@ -12,7 +13,7 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
       manifest: {
-        id: '/',
+        id: '/AIAgentv7/',           // <--- Updated from '/'
         name: 'The Desk — AI Assistant',
         short_name: 'The Desk',
         description: 'A mobile-first chat client for your personal AI assistant.',
@@ -20,8 +21,8 @@ export default defineConfig({
         background_color: '#242825',
         display: 'standalone',
         orientation: 'portrait',
-        start_url: '/',
-        scope: '/',
+        start_url: '/AIAgentv7/',    // <--- Updated from '/'
+        scope: '/AIAgentv7/',        // <--- Updated from '/'
         icons: [
           {
             src: 'icons/icon-192.png',
