@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>The Desk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --slate: #242825;
+    --slate-2: #2c312d;
+    --slate-3: #363c37;
+    --paper: #f3ecda;
+    --paper-2: #ece2c9;
+    --paper-line: #d9cfb1;
+    --ink: #262a27;
+    --ink-soft: #504a3d;
+    --muted: #9c9587;
+    --paper-muted: #83795f;
+    --brass: #c68a34;
+    --brass-dark: #a06f27;
+    --teal: #3e6259;
+    --plum: #6b4a6e;
+    --stamp: #b23a2f;
+    --moss: #5c6b3f;
+    --radius: 3px;
+    --font-display: "Zilla Slab", Georgia, serif;
+    --font-body: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --font-mono: "IBM Plex Mono", "SF Mono", Consolas, monospace;
+  }
+
+  *{ box-sizing: border-box; }
+  html,body{ height:100%; margin:0; }
+  body{
+    background: var(--slate);
+    color: var(--paper);
+    font-family: var(--font-body);
+    display:flex;
+    overflow:hidden;
+  }
+  ::selection{ background: var(--brass); color: var(--slate); }
+
+  a{ color: inherit; }
+  button{ font-family: inherit; }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+  }
+
+  /* ---------- layout shell ---------- */
+  .app{
+    display:flex;
+    width:100%;
+    height:100%;
+  }
+
+  /* ---------- sidebar ---------- */
+  .sidebar{
+    width: 296px;
+    flex: none;
+    background: var(--slate-2);
+    border-right: 1px solid rgba(255,255,255,0.06);
+    display:flex;
+    flex-direction:column;
+    height:100%;
+  }
+  .brand{
+    padding: 22px 20px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .brand-eyebrow{
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--brass);
+    margin: 0 0 6px;
+  }
+  .brand-title{
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 26px;
+    margin: 0 0 6px;
+    color: var(--paper);
+    letter-spacing: 0.01em;
+  }
+  .brand-sub{
+    font-size: 12.5px;
+    color: var(--muted);
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  .acct{
+    margin: 14px 20px 0;
+    padding: 8px 10px;
+    background: rgba(0,0,0,0.18);
+    border: 1px dashed rgba(255,255,255,0.14);
+    border-radius: var(--radius);
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    color: var(--muted);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap: 8px;
+  }
+  .acct .dot{
+    width:6px; height:6px; border-radius:50%;
+    background: var(--moss);
+    box-shadow: 0 0 0 2px rgba(92,107,63,0.25);
+    flex: none;
+  }
+  .acct .dot.off{ background: var(--stamp); box-shadow: 0 0 0 2px rgba(178,58,47,0.25); }
+  .acct span.id{ color: var(--paper-2); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+  .tabs-label{
+    margin: 20px 20px 8px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .tabs{
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 12px 12px;
+    display:flex;
+    flex-direction:column;
+    gap: 4px;
+  }
+  .tabs::-webkit-scrollbar{ width: 8px; }
+  .tabs::-webkit-scrollbar-thumb{ background: rgba(255,255,255,0.08); border-radius: 4px; }
+
+  .tab-row{
+    display:flex;
+    align-items:flex-start;
+    gap: 10px;
+    padding: 9px 8px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    background: transparent;
+    border: 1px solid transparent;
+    text-align: left;
+    width: 100%;
+    color: inherit;
+    transition: background 0.12s ease, border-color 0.12s ease, transform 0.08s ease;
+  }
+  .tab-row:hover{ background: rgba(255,255,255,0.04); }
+  .tab-row:active{ transform: scale(0.99); }
+  .tab-row:focus-visible{ outline: 2px solid var(--brass); outline-offset: 1px; }
+  .tab-row.selected{
+    background: rgba(198,138,52,0.10);
+    border-color: rgba(198,138,52,0.35);
+  }
+
+  .tab-mark{
+    flex: none;
+    width: 34px;
+    height: 22px;
+    border-radius: 2px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: rgba(0,0,0,0.72);
+    margin-top: 2px;
+  }
+  .tab-body{ min-width: 0; }
+  .tab-title{
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 14.5px;
+    color: var(--paper);
+    margin: 0 0 2px;
+  }
+  .tab-desc{
+    font-size: 11.5px;
+    color: var(--muted);
+    line-height: 1.4;
+    margin: 0;
+  }
+
+  .sidebar-footer{
+    padding: 12px 20px 18px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  .sidebar-footer button{
+    margin-top: 8px;
+    background: none;
+    border: 1px solid rgba(255,255,255,0.15);
+    color: var(--paper-2);
+    font-size: 11px;
+    padding: 5px 10px;
+    border-radius: var(--radius);
+    cursor: pointer;
+  }
+  .sidebar-footer button:hover{ border-color: var(--brass); color: var(--brass); }
+
+  /* ---------- main ---------- */
+  .main{
+    flex: 1;
+    display:flex;
+    flex-direction:column;
+    min-width: 0;
+    height: 100%;
+  }
+  .topbar{
+    flex: none;
+    padding: 16px 28px;
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .topbar-focus-label{
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .topbar-focus-title{
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--paper);
+    margin-left: 10px;
+  }
+  .topbar-hint{
+    font-size: 11.5px;
+    color: var(--muted);
+  }
+
+  .log-wrap{
+    flex: 1;
+    overflow-y: auto;
+    padding: 26px 28px 10px;
+  }
+  .log-wrap::-webkit-scrollbar{ width: 10px; }
+  .log-wrap::-webkit-scrollbar-thumb{ background: rgba(255,255,255,0.08); border-radius: 5px; }
+
+  .ledger{
+    max-width: 760px;
+    margin: 0 auto;
+    background: var(--paper);
+    color: var(--ink);
+    border-radius: 4px;
+    box-shadow: 0 10px 34px rgba(0,0,0,0.28);
+    min-height: 100%;
+    padding: 4px 0 8px;
+  }
+
+  .empty-state{
+    padding: 60px 40px;
+    text-align:center;
+  }
+  .empty-state p{
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 15px;
+    color: var(--paper-muted);
+    max-width: 340px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  .entry{
+    display:flex;
+    gap: 14px;
+    padding: 12px 22px;
+    border-bottom: 1px solid var(--paper-line);
+  }
+  .entry:last-child{ border-bottom: none; }
+  .entry-time{
+    flex: none;
+    width: 64px;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    color: var(--paper-muted);
+    padding-top: 3px;
+  }
+  .entry-body{ min-width: 0; flex: 1; }
+  .entry-tag{
+    display:inline-block;
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 1px 6px;
+    border-radius: 2px;
+    margin-bottom: 5px;
+  }
+  .entry.user .entry-tag{ background: rgba(62,98,89,0.15); color: var(--teal); }
+  .entry.assistant .entry-tag{ background: rgba(198,138,52,0.16); color: var(--brass-dark); }
+  .entry.error .entry-tag{ background: rgba(178,58,47,0.14); color: var(--stamp); }
+  .entry-text{
+    font-size: 14px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+  .entry.error .entry-text{ color: var(--stamp); }
+  .entry-text a{ color: var(--brass-dark); }
+
+  .thinking .entry-text{
+    color: var(--paper-muted);
+    font-style: italic;
+  }
+  .thinking .dots::after{
+    content: '';
+    display: inline-block;
+    animation: dots 1.3s steps(4,end) infinite;
+  }
+  @keyframes dots{
+    0%{ content: ''; }
+    25%{ content: '.'; }
+    50%{ content: '..'; }
+    75%{ content: '...'; }
+    100%{ content: ''; }
+  }
+
+  .retry-btn{
+    margin-top: 6px;
+    background: none;
+    border: 1px solid var(--stamp);
+    color: var(--stamp);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 2px;
+    cursor: pointer;
+  }
+  .retry-btn:hover{ background: rgba(178,58,47,0.08); }
+
+  /* ---------- composer ---------- */
+  .composer{
+    flex: none;
+    padding: 14px 28px 22px;
+  }
+  .composer-inner{
+    max-width: 760px;
+    margin: 0 auto;
+    display:flex;
+    align-items:flex-end;
+    gap: 10px;
+    background: var(--slate-3);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 6px;
+    padding: 8px 8px 8px 14px;
+  }
+  .composer textarea{
+    flex: 1;
+    background: transparent;
+    border: none;
+    resize: none;
+    color: var(--paper);
+    font-family: var(--font-body);
+    font-size: 14px;
+    line-height: 1.5;
+    max-height: 160px;
+    min-height: 22px;
+    padding: 6px 0;
+  }
+  .composer textarea:focus{ outline: none; }
+  .composer textarea::placeholder{ color: var(--muted); }
+
+  .send-btn{
+    flex: none;
+    background: var(--brass);
+    color: #241a0a;
+    border: none;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 10px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: transform 0.08s ease, background 0.12s ease;
+  }
+  .send-btn:hover{ background: #d6963c; }
+  .send-btn:active{ transform: scale(0.96); }
+  .send-btn:disabled{ background: var(--slate-2); color: var(--muted); cursor: not-allowed; }
+  .send-btn:focus-visible{ outline: 2px solid var(--brass); outline-offset: 2px; }
+
+  .composer-note{
+    max-width: 760px;
+    margin: 6px auto 0;
+    font-size: 10.5px;
+    color: var(--muted);
+    text-align: right;
+  }
+
+  /* ---------- mobile ---------- */
+  .sidebar-toggle{ display:none; }
+
+  @media (max-width: 800px){
+    .sidebar{
+      position: fixed;
+      z-index: 20;
+      left: 0; top: 0; bottom: 0;
+      transform: translateX(-100%);
+      transition: transform 0.18s ease;
+      box-shadow: 12px 0 30px rgba(0,0,0,0.4);
+    }
+    .sidebar.open{ transform: translateX(0); }
+    .sidebar-toggle{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      background: none;
+      border: 1px solid rgba(255,255,255,0.15);
+      color: var(--paper-2);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      padding: 6px 10px;
+      border-radius: var(--radius);
+      cursor: pointer;
+    }
+    .topbar-focus-title{ display:none; }
+    .log-wrap{ padding: 18px 14px 6px; }
+    .composer{ padding: 10px 14px 16px; }
+    .entry-time{ width: 46px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <p class="brand-eyebrow">Personal Assistant</p>
+      <h1 class="brand-title">The Desk</h1>
+      <p class="brand-sub">Say what you need in plain words. Pick a line on the left if you want a running start.</p>
+    </div>
+
+    <div class="acct">
+      <span class="dot" id="statusDot"></span>
+      <span class="id" id="acctId">acct. —</span>
+    </div>
+
+    <p class="tabs-label">What the desk handles</p>
+    <div class="tabs" id="tabs"></div>
+
+    <div class="sidebar-footer">
+      This desk knows you by the account code above — it's how it remembers your tasks, notes, and preferences between visits. Clearing your browser's site data starts a new, empty one.
+      <button id="clearViewBtn" type="button">Clear conversation view</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <span class="topbar-focus-label" id="focusLabel">General</span>
+        <span class="topbar-focus-title" id="focusTitle">Talk to the desk</span>
+      </div>
+      <button class="sidebar-toggle" id="sidebarToggle" type="button">☰ What the desk handles</button>
+    </div>
+
+    <div class="log-wrap">
+      <div class="ledger" id="ledger">
+        <div class="empty-state" id="emptyState">
+          <p>The page is blank so far. Write the first line, or choose something from the desk.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="composer">
+      <div class="composer-inner">
+        <textarea id="composerInput" rows="1" placeholder="Write to the desk…" aria-label="Message"></textarea>
+        <button class="send-btn" id="sendBtn" type="button">Send</button>
+      </div>
+      <p class="composer-note">Enter to send · Shift+Enter for a new line</p>
+    </div>
+  </main>
+
+</div>
+
+<script>
+(function(){
+  const WEBHOOK_URL = "https://myn8napp27052008.duckdns.org/webhook/assistant-inbound";
+
+  const FEATURES = [
+    { code:"MSG", color:"var(--brass)",  title:"Messages",         desc:"Draft, send, or check what's come in.",                  prompt:"Draft a message to " },
+    { code:"MEM", color:"var(--teal)",   title:"Memory",           desc:"Save something so it's remembered for good.",            prompt:"Remember that " },
+    { code:"TSK", color:"var(--plum)",   title:"Tasks",            desc:"Track promises, deadlines, and follow-ups.",              prompt:"Add a task: " },
+    { code:"RES", color:"var(--stamp)",  title:"Research",         desc:"Look into a topic with real, sourced answers.",           prompt:"Look into " },
+    { code:"DOC", color:"var(--moss)",   title:"Files & Notes",    desc:"Hand over a document, ask about it later.",               prompt:"Here's something to remember for later: " },
+    { code:"MTG", color:"var(--brass)",  title:"People & Meetings",desc:"Prep before a meeting, log what happened after.",        prompt:"I'm meeting with  about . What should I know?" },
+    { code:"CAL", color:"var(--teal)",   title:"Calendar",         desc:"Check the schedule or a proposed time.",                  prompt:"What's on the schedule for " },
+    { code:"DEC", color:"var(--plum)",   title:"Decisions",        desc:"Think a choice through, keep it on record.",              prompt:"Help me decide between  and " },
+    { code:"LIFE",color:"var(--stamp)",  title:"Personal Errands", desc:"Log errands, appointments, small reminders.",             prompt:"Add an errand: " },
+    { code:"BRF", color:"var(--moss)",   title:"Briefing",         desc:"Get a rundown of what's due and coming up.",              prompt:"Give me my briefing" },
+    { code:"APR", color:"var(--brass)",  title:"Approvals",        desc:"See what's waiting on your go-ahead.",                    prompt:"What's waiting on my approval?" },
+  ];
+
+  const tabsEl = document.getElementById('tabs');
+  const ledgerEl = document.getElementById('ledger');
+  const emptyStateEl = document.getElementById('emptyState');
+  const composerInput = document.getElementById('composerInput');
+  const sendBtn = document.getElementById('sendBtn');
+  const acctIdEl = document.getElementById('acctId');
+  const statusDot = document.getElementById('statusDot');
+  const focusLabel = document.getElementById('focusLabel');
+  const focusTitle = document.getElementById('focusTitle');
+  const sidebar = document.getElementById('sidebar');
+  const sidebarToggle = document.getElementById('sidebarToggle');
+  const logWrap = document.querySelector('.log-wrap');
+
+  let sessionId = null;
+  let history = [];
+  let sending = false;
+
+  function renderTabs(){
+    tabsEl.innerHTML = '';
+    FEATURES.forEach((f, i) => {
+      const row = document.createElement('button');
+      row.type = 'button';
+      row.className = 'tab-row';
+      row.setAttribute('data-index', i);
+      row.innerHTML =
+        '<span class="tab-mark" style="background:' + f.color + '">' + f.code + '</span>' +
+        '<span class="tab-body">' +
+          '<p class="tab-title">' + f.title + '</p>' +
+          '<p class="tab-desc">' + f.desc + '</p>' +
+        '</span>';
+      row.addEventListener('click', () => selectFeature(i));
+      tabsEl.appendChild(row);
+    });
+  }
+
+  function selectFeature(i){
+    const f = FEATURES[i];
+    document.querySelectorAll('.tab-row').forEach(el => el.classList.remove('selected'));
+    const row = tabsEl.querySelector('[data-index="' + i + '"]');
+    if (row) row.classList.add('selected');
+    focusLabel.textContent = f.code;
+    focusTitle.textContent = f.title;
+    composerInput.value = f.prompt;
+    autoGrow();
+    composerInput.focus();
+    composerInput.setSelectionRange(composerInput.value.length, composerInput.value.length);
+    if (window.innerWidth <= 800) sidebar.classList.remove('open');
+  }
+
+  function autoGrow(){
+    composerInput.style.height = 'auto';
+    composerInput.style.height = Math.min(composerInput.scrollHeight, 160) + 'px';
+  }
+
+  function fmtTime(ts){
+    const d = new Date(ts);
+    return d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+  }
+
+  function renderLog(){
+    if (history.length === 0){
+      ledgerEl.innerHTML = '';
+      ledgerEl.appendChild(emptyStateEl);
+      return;
+    }
+    ledgerEl.innerHTML = '';
+    history.forEach(entry => {
+      ledgerEl.appendChild(buildEntryEl(entry));
+    });
+    logWrap.scrollTop = logWrap.scrollHeight;
+  }
+
+  function buildEntryEl(entry){
+    const row = document.createElement('div');
+    row.className = 'entry ' + entry.role + (entry.pending ? ' thinking' : '');
+    const tagText = entry.role === 'user' ? 'You' : (entry.role === 'error' ? 'Desk — error' : 'Desk');
+    row.innerHTML =
+      '<div class="entry-time">' + fmtTime(entry.ts) + '</div>' +
+      '<div class="entry-body">' +
+        '<span class="entry-tag">' + tagText + '</span>' +
+        '<div class="entry-text">' + escapeHtml(entry.text) + (entry.pending ? '<span class="dots"></span>' : '') + '</div>' +
+        (entry.retry ? '<button class="retry-btn" type="button">Try again</button>' : '') +
+      '</div>';
+    if (entry.retry){
+      row.querySelector('.retry-btn').addEventListener('click', () => {
+        history = history.filter(e => e !== entry);
+        sendMessage(entry.retryText, true);
+      });
+    }
+    return row;
+  }
+
+  function escapeHtml(s){
+    const div = document.createElement('div');
+    div.textContent = s;
+    return div.innerHTML;
+  }
+
+  async function persistHistory(){
+    try{
+      await window.storage.set('chat_log:' + sessionId, JSON.stringify(history.filter(e => !e.pending)), false);
+    }catch(e){ /* non-fatal: conversation still works, just won't survive a reload */ }
+  }
+
+  async function loadHistory(){
+    try{
+      const res = await window.storage.get('chat_log:' + sessionId, false);
+      if (res && res.value) history = JSON.parse(res.value);
+    }catch(e){ history = []; }
+    renderLog();
+  }
+
+  async function ensureSession(){
+    try{
+      const res = await window.storage.get('session_id', false);
+      if (res && res.value){
+        sessionId = res.value;
+      }
+    }catch(e){ /* key doesn't exist yet */ }
+    if (!sessionId){
+      sessionId = 'desk-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
+      try{ await window.storage.set('session_id', sessionId, false); }catch(e){ /* falls back to in-memory only for this visit */ }
+    }
+    acctIdEl.textContent = 'acct. ' + sessionId;
+    acctIdEl.title = sessionId;
+  }
+
+  async function sendMessage(rawText, isRetry){
+    const text = (rawText !== undefined ? rawText : composerInput.value).trim();
+    if (!text || sending) return;
+
+    sending = true;
+    sendBtn.disabled = true;
+    statusDot.classList.remove('off');
+
+    if (!isRetry){
+      history.push({ role:'user', text, ts: Date.now() });
+      composerInput.value = '';
+      autoGrow();
+    }
+    const pendingEntry = { role:'assistant', text:'Checking the ledger', ts: Date.now(), pending:true };
+    history.push(pendingEntry);
+    renderLog();
+    persistHistory();
+
+    try{
+      const res = await fetch(WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: text, session_id: sessionId })
+      });
+      const rawBody = await res.text();
+      let data = null;
+      try{ data = rawBody ? JSON.parse(rawBody) : null; }catch(parseErr){ data = null; }
+
+      if (!res.ok){
+        const detail = data && data.message ? data.message : (rawBody ? rawBody.slice(0, 200) : ('status ' + res.status));
+        throw new Error('The desk answered with an error: ' + detail);
+      }
+      if (!data){
+        throw new Error("The desk's reply wasn't in the expected format" + (rawBody ? ' (' + rawBody.slice(0, 150) + ')' : ' (empty response)') + '.');
+      }
+      const reply = (typeof data.reply === 'string') ? data.reply
+                    : (data.reply !== undefined) ? JSON.stringify(data.reply)
+                    : JSON.stringify(data);
+      history = history.filter(e => e !== pendingEntry);
+      history.push({ role:'assistant', text: reply || '(no reply text came back)', ts: Date.now() });
+    }catch(err){
+      history = history.filter(e => e !== pendingEntry);
+      history.push({
+        role:'error',
+        text: "Couldn't reach the desk. " + (err && err.message ? err.message : 'Check the connection and try again.'),
+        ts: Date.now(),
+        retry: true,
+        retryText: text
+      });
+      statusDot.classList.add('off');
+    }finally{
+      sending = false;
+      sendBtn.disabled = false;
+      renderLog();
+      persistHistory();
+    }
+  }
+
+  sendBtn.addEventListener('click', () => sendMessage());
+  composerInput.addEventListener('input', autoGrow);
+  composerInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey){
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+
+  document.getElementById('clearViewBtn').addEventListener('click', () => {
+    history = [];
+    renderLog();
+    persistHistory();
+  });
+
+  sidebarToggle.addEventListener('click', () => sidebar.classList.toggle('open'));
+  document.addEventListener('click', (e) => {
+    if (window.innerWidth <= 800 && sidebar.classList.contains('open')){
+      if (!sidebar.contains(e.target) && e.target !== sidebarToggle && !sidebarToggle.contains(e.target)){
+        sidebar.classList.remove('open');
+      }
+    }
+  });
+
+  (async function init(){
+    renderTabs();
+    await ensureSession();
+    await loadHistory();
+  })();
+})();
+</script>
+
+</body>
+</html>
